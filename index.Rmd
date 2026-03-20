@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Read in libraries
 
-```{r libraries, echo= FALSE}
+```{r libraries, message=FALSE, warning=FALSE}
 #----Load libraries and check data----
 library(ggpubr)
 library(PerformanceAnalytics)
@@ -31,9 +31,9 @@ library(ggplot2)
 
 ## Read in data
 
-Also standardize variables and chec correlations
+Also standardize variables and check correlations
 
-```{r data, echo=TRUE}
+```{r data, echo=TRUE, warning=FALSE}
 # Read in script
 Trans_2 <-read.csv('Transloc_sum_V5.csv', header = TRUE)
 summary(Trans_2)
