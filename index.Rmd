@@ -37,7 +37,7 @@ library(ggplot2)
 Also standardize variables and check correlations
 
 ```{r data, echo=TRUE, warning=FALSE}
-# Read in script
+# Read in data
 Trans_2 <-read.csv('Transloc_sum_V5.csv', header = TRUE)
 summary(Trans_2)
 
@@ -48,8 +48,14 @@ Trans_2 <- Trans_2 %>%
   mutate(Conspecifics_std = as.numeric(scale(Conspecifics))) %>%
   mutate(Total_release_std = as.numeric(scale(Total_release)))
 
+# Calculate season survival as a proportion of individuals
+# that survive the translocation
+Trans_2 <- Trans_2 %>%
+  mutate(Prop_season_survive2 = (Season_survive/Transloc)) %>%
+  mutate(Prop_season_survive2 = ifelse(is.nan(Prop_season_survive2), 0, Prop_season_survive2))
+
 # Check correlations
-correlation_subset <- Trans_2[, c(10,12,14,15,30,31,32,33)]
+correlation_subset <- Trans_2[, c(10,12,14,15,30,31,32,33,34)]
 chart.Correlation(correlation_subset, histogram=TRUE)
 ```
 
@@ -98,14 +104,17 @@ vif(f4)
 
 ```{r model2, echo=TRUE}
 #----Run models on season survival----
-b1 <- glm(cbind(Season_survive, Total_r - Season_survive) ~ Total_release_std, family="binomial", data=Trans_2)
-b2 <- glm(cbind(Season_survive, Total_r - Season_survive) ~ Transmitters_std, family="binomial", data=Trans_2)
-b3 <- glm(cbind(Season_survive, Total_r - Season_survive) ~ Training_std, family="binomial", data=Trans_2)
-b4 <- glm(cbind(Season_survive, Total_r - Season_survive) ~ Total_release_std + Transmitters_std + Training_std , family="binomial", data=Trans_2)
-b5 <- glm(cbind(Season_survive, Total_r - Season_survive) ~ 1 , family="binomial", data=Trans_2)
+# deleting the dnake island row as it causes a NAN
+Trans_3 <- Trans_2  %>%
+  filter(Rel_loc != "SI")
+
+b1 <- glm(cbind(Season_survive, Transloc - Season_survive) ~ Total_release_std, family="binomial", data=Trans_3)
+b2 <- glm(cbind(Season_survive, Transloc - Season_survive) ~ Transmitters_std, family="binomial", data=Trans_3)
+b3 <- glm(cbind(Season_survive, Transloc - Season_survive) ~ Training_std, family="binomial", data=Trans_3)
+b4 <- glm(cbind(Season_survive, Transloc - Season_survive) ~ Total_release_std + Transmitters_std + Training_std , family="binomial", data=Trans_3)
+b5 <- glm(cbind(Season_survive, Transloc - Season_survive) ~ 1 , family="binomial", data=Trans_3)
 
 summary(b2)
-summary(b4)
 ```
 
 # Model selection of season survival models
@@ -229,7 +238,7 @@ p
 ```{r survival, echo=TRUE}
 # Make survival plot
 
-p1 <- ggplot(Trans_2,aes(x=Prop_Season_survival, y=Prop_Transloc)) +
+p1 <- ggplot(Trans_2,aes(x=Prop_season_survive2, y=Prop_Transloc)) +
   geom_point() +
   theme(panel.background = element_rect(fill = 'white', colour = 'darkgrey')) +
   geom_smooth(method=lm, level=0.99, col='black') +
@@ -238,7 +247,7 @@ p1 <- ggplot(Trans_2,aes(x=Prop_Season_survival, y=Prop_Transloc)) +
   theme(axis.text.x = element_text(colour = "black"), axis.text.y = element_text(colour = "black")) +
   theme(text = element_text(size = 12))  
 
-p2 <- ggplot(Trans_2,aes(x=Prop_Returns,y=Prop_Season_survival)) +   geom_smooth(method=lm, level=0.99, col='black') +
+p2 <- ggplot(Trans_2,aes(x=Prop_Returns,y=Prop_season_survive2)) +   geom_smooth(method=lm, level=0.99, col='black') +
   geom_point() +
   theme(panel.background = element_rect(fill = 'white', colour = 'darkgrey')) +
   theme(panel.grid.major = element_line(colour = 'white')) +
