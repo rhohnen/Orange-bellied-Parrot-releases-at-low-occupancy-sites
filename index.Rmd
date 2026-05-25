@@ -203,6 +203,9 @@ b2plot <- ggplot() +
 
 f4plot + b2plot +
   plot_annotation(tag_levels = "a")
+
+ggsave(".plots/Predicted_effects.pdf", width = 10, height = 5, units ="in")
+ggsave(".plots/Predicted_effects.jpg", width = 10, height = 5, units ="in")
 ```
 
 # Plot coef estimates
@@ -231,6 +234,8 @@ p <- ggplot(coef_data, aes(x = Coefficent_estimate, y = Variable)) +
   facet_wrap(~model) +
   theme_bw()
 p
+
+ggsave(".plots/Coef_est_plots.pdf", width = 10, height = 5, units ="in")
 ```
 
 # Make survival plots
@@ -257,6 +262,9 @@ p2 <- ggplot(Trans_2,aes(x=Prop_Returns,y=Prop_season_survive2)) +   geom_smooth
 
 p1 + p2 +
   plot_annotation(tag_levels = "a")
+
+ggsave(".plots/Survival.pdf", width = 10, height = 5, units ="in")
+ggsave(".plots/Survival.jpg", width = 10, height = 5, units ="in")
 ```
 
 # Plot survival differences
